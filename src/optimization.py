@@ -9,8 +9,9 @@ def get_loss():
     optionally moving it to the GPU if use_cuda is set to True
     """
 
-    # YOUR CODE HERE: select a loss appropriate for classification
-    loss  = # YOUR CODE HERE
+    # CrossEntropyLoss expects raw logits, so no softmax should be applied
+    # in the model itself.
+    loss = nn.CrossEntropyLoss()
 
     return loss
 
@@ -25,26 +26,39 @@ def get_optimizer(
     """
     Returns an optimizer instance
 
+    Only parameters with ``requires_grad=True`` are passed to the optimizer,
+    which is important for transfer learning (frozen backbones).
+
     :param model: the model to optimize
-    :param optimizer: one of 'SGD' or 'Adam'
+    :param optimizer: one of 'SGD', 'Adam' or 'AdamW'
     :param learning_rate: the learning rate
     :param momentum: the momentum (if the optimizer uses it)
     :param weight_decay: regularization coefficient
     """
+
+    # Only optimize parameters that require gradients (transfer learning)
+    params = filter(lambda p: p.requires_grad, model.parameters())
+
     if optimizer.lower() == "sgd":
-        # YOUR CODE HERE: create an instance of the SGD
-        # optimizer. Use the input parameters learning_rate, momentum
-        # and weight_decay
         opt = torch.optim.SGD(
-            # YOUR CODE HERE
+            params,
+            lr=learning_rate,
+            momentum=momentum,
+            weight_decay=weight_decay,
         )
 
     elif optimizer.lower() == "adam":
-        # YOUR CODE HERE: create an instance of the Adam
-        # optimizer. Use the input parameters learning_rate, momentum
-        # and weight_decay
         opt = torch.optim.Adam(
-            # YOUR CODE HERE
+            params,
+            lr=learning_rate,
+            weight_decay=weight_decay,
+        )
+
+    elif optimizer.lower() == "adamw":
+        opt = torch.optim.AdamW(
+            params,
+            lr=learning_rate,
+            weight_decay=weight_decay,
         )
     else:
         raise ValueError(f"Optimizer {optimizer} not supported")

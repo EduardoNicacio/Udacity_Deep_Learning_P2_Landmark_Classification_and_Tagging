@@ -7,10 +7,13 @@ import torch.nn.functional as F
 from tqdm import tqdm
 from torchvision import datasets
 import torchvision.transforms as T
+from typing import List
 from .helpers import get_data_location
 
 
 class Predictor(nn.Module):
+
+    class_names: List[str]
 
     def __init__(self, model, class_names, mean, std):
         super().__init__()
@@ -30,14 +33,24 @@ class Predictor(nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         with torch.no_grad():
             # 1. apply transforms
-            x  = # YOUR CODE HERE
+            x = self.transforms(x)
             # 2. get the logits
-            x  = # YOUR CODE HERE
-            # 3. apply softmax
-            #    HINT: remmeber to apply softmax across dim=1
-            x  = # YOUR CODE HERE
+            x = self.model(x)
+            # 3. apply softmax across the class dimension
+            x = F.softmax(x, dim=1)
 
             return x
+
+
+def predictor_transform(x: torch.Tensor, mean: List[float], std: List[float]) -> torch.Tensor:
+    """Resize a ``(B, 3, H, W)`` tensor in ``[0, 1]`` to 224x224 and normalize it.
+
+    Uses pure tensor operations so it is safe to use inside TorchScript.
+    """
+    x = F.interpolate(x, size=(224, 224), mode="bilinear", align_corners=False)
+    mean_t = torch.as_tensor(mean, dtype=x.dtype, device=x.device).view(1, -1, 1, 1)
+    std_t = torch.as_tensor(std, dtype=x.dtype, device=x.device).view(1, -1, 1, 1)
+    return (x - mean_t) / std_t
 
 
 def predictor_test(test_dataloader, model_reloaded):
@@ -90,7 +103,7 @@ def test_model_construction(data_loaders):
     model = MyModel(num_classes=3, dropout=0.3)
 
     dataiter = iter(data_loaders["train"])
-    images, labels = dataiter.next()
+    images, labels = next(dataiter)
 
     predictor = Predictor(model, class_names=['a', 'b', 'c'], mean=mean, std=std)
 

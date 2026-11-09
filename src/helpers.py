@@ -103,9 +103,12 @@ def compute_mean_and_std():
     ds = datasets.ImageFolder(
         folder, transform=transforms.Compose([transforms.ToTensor()])
     )
-    dl = torch.utils.data.DataLoader(
-        ds, batch_size=1, num_workers=multiprocessing.cpu_count()
-    )
+
+    # On Windows, DataLoader worker processes cannot be spawned reliably from
+    # Jupyter/pytest without a __main__ guard, so we compute serially there.
+    num_workers = 0 if os.name == "nt" else multiprocessing.cpu_count()
+
+    dl = torch.utils.data.DataLoader(ds, batch_size=1, num_workers=num_workers)
 
     mean = 0.0
     for images, _ in tqdm(dl, total=len(ds), desc="Computing mean", ncols=80):
@@ -138,6 +141,17 @@ def after_subplot(ax: plt.Axes, group_name: str, x_label: str):
 
     if group_name.lower() == "loss":
         ax.set_ylim([None, 4.5])
+
+
+def save_checkpoint(model: torch.nn.Module, path: str) -> None:
+    """Save a model's state dict to ``path`` (creating parent dirs if needed)."""
+    os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+    torch.save(model.state_dict(), path)
+
+
+def load_checkpoint(path: str) -> dict:
+    """Load a state dict from ``path`` onto the CPU."""
+    return torch.load(path, map_location="cpu")
 
 
 def plot_confusion_matrix(pred, truth):
