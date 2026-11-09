@@ -38,33 +38,33 @@ The environment is already setup for you, including the starter code, so you can
 This setup requires a bit of familiarity with creating a working deep learning environment. While things should work out of the box, in case of problems you might have to do operations on your system (like installing new NVIDIA drivers) that are not covered in the class. Please do this if you are at least a bit familiar with these subjects, otherwise please consider using the provided Udacity workspace that you find in the classroom.
 
 1. Open a terminal and clone the repository, then navigate to the downloaded folder:
- 
- ``` 
-  git clone https://github.com/udacity/cd1821-CNN-project-starter.git
-  cd cd1821-CNN-project-starter
- ```
+
+    ```bash
+    git clone https://github.com/udacity/cd1821-CNN-project-starter.git
+    cd cd1821-CNN-project-starter
+    ```
 
 2. Create a new conda environment with python 3.7.6:
 
-    ```
-        conda create --name udacity_cnn_project -y python=3.7.6
-        conda activate udacity_cnn_project
+    ```bash
+    conda create --name udacity_cnn_project -y python=3.7.6
+    conda activate udacity_cnn_project
     ```
 
     NOTE: you will have to execute `conda activate udacity_cnn_project` for every new terminal session.
 
 3. Install the requirements of the project:
 
-    ```
-        pip install -r requirements.txt
+    ```bash
+    pip install -r requirements.txt
     ```
 
 4. Install and open Jupyter lab:
- 
- ```
-        pip install jupyterlab
-  jupyter lab
- ```
+
+    ```bash
+    pip install jupyterlab
+    jupyter lab
+    ```
 
 ### Developing your project
 
